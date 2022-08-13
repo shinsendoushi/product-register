@@ -1,0 +1,37 @@
+version: '3'
+
+# docker のボリューム
+volumes:
+  db-data:
+
+services:
+  web:
+    build: .
+    ports:
+      - '3000:3000'
+    volumes:
+      - '.:/product-register'
+    # コンテナ側の環境変数を設定する
+    environment:
+      - 'DATABASE_PASSWORD=postgres'
+    tty: true
+    stdin_open: true
+    # 指定したサービスが起動したら docker run する
+    depends_on:
+      - db
+    # Web から db にアクセスできるようになる
+    links:
+      - db
+  
+  # データをホスト側に保存しておきたい場合
+  db:
+    image: postgres
+    volumes:
+      - 'db-data:/var/lib/postgresql/data'
+    # db の STATUSが exited のままの場合、以下3行を追加  
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=postgres'
+      # POSTGRES_USER: postgres
+      # POSTGRES_PASSWORD: postgres
